@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'planner = planner.__init__:main',
+            'planner = planner.control_node:main',
         ],
     },
 )
