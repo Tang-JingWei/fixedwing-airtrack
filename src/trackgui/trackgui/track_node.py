@@ -17,6 +17,14 @@ from geometry_msgs.msg import Point
 from cv_bridge import CvBridge
 from trackgui.msg import Target  # 导入自定义消息
 
+# from utils.mavrosSub import MavrosSubscriber
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSDurabilityPolicy, QoSHistoryPolicy
+from mavros_msgs.msg import State, Altitude
+from sensor_msgs.msg import NavSatFix
+from mavros_msgs.msg import GPSRAW
+from geometry_msgs.msg import TwistStamped, PoseStamped
+import math
+
 import kcf.tracker
 import kcf.run
 
@@ -86,6 +94,41 @@ class MainWindow(QMainWindow, Node):
         self.show_wheel_timer = QtCore.QTimer(self)  # 定时器，用于控制框的显示时间
         self.show_wheel_timer.timeout.connect(self.hide_wheel_box)
 
+        # mavros数据订阅
+        # QoS 设置，与 MAVROS 匹配
+        qos = QoSProfile(
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            durability=QoSDurabilityPolicy.VOLATILE,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=10
+        )
+        
+        self.state = None
+        self.altitude = 0.0
+        self.vfr_hud = None
+        self.battery = None
+        self.gps_raw = None
+        self.nav_sat_fix = None
+        self.target_info = None
+        self.vx = 0.0
+        self.vy = 0.0
+        self.vz = 0.0
+        self.roll_rate = 0.0
+        self.pitch_rate = 0.0
+        self.yaw_rate = 0.0
+
+        self.create_subscription(State, '/mavros/state', self.state_callback, qos)
+        self.create_subscription(PoseStamped, '/mavros/local_position/pose', self.altitude_callback, qos)
+        self.create_subscription(GPSRAW, '/mavros/gpsstatus/gps1/raw', self.gps_raw_callback, qos)
+        self.create_subscription(NavSatFix, '/mavros/global_position/global', self.nav_sat_fix_callback, qos)
+        # self.create_subscription(String, '/custom/target', self.target_callback, qos)
+        self.create_subscription(TwistStamped, '/mavros/local_position/velocity_body', self.velocity_callback, qos)
+
+        # self.mavrosSub = MavrosSubscriber()
+        self.show_msg_timer = QtCore.QTimer(self)
+        self.show_msg_timer.timeout.connect(self.show_msg)
+        self.show_msg_timer.start(1000)
+
         self.init_slot()
 
     def init_slot(self):
@@ -106,6 +149,51 @@ class MainWindow(QMainWindow, Node):
     def hide_wheel_box(self):
         self.show_wheel_box = False  # 定时器超时后，设置标志位为 False，隐藏中间的框
         self.show_wheel_timer.stop()  # 停止定时器
+
+
+    def state_callback(self, msg):
+        self.state = msg
+
+    # 高度回调
+    def altitude_callback(self, msg):
+        self.altitude = msg.pose.position.z
+
+    # 速度回调
+    def velocity_callback(self, msg):
+        self.vx = msg.twist.linear.x
+        self.vy = msg.twist.linear.y
+        self.vz = msg.twist.linear.z
+        self.roll_rate = msg.twist.angular.x
+        self.pitch_rate = msg.twist.angular.y
+        self.yaw_rate = msg.twist.angular.z
+
+    def gps_raw_callback(self, msg):
+        self.gps_raw = msg
+
+    def nav_sat_fix_callback(self, msg):
+        self.nav_sat_fix = msg
+
+    def target_info_callback(self, msg):
+        self.target_info = msg
+
+    def rad_to_deg(self, rad_per_sec):
+        return rad_per_sec * (180 / math.pi)
+
+    # 显示飞行数据
+    def show_msg(self):
+        self.ui.vel_x.setText(str(format(self.vx, '.2f'))) # 速度
+        self.ui.vel_y.setText(str(format(self.vy, '.2f')))
+        self.ui.vel_z.setText(str(format(self.vz, '.2f')))
+        self.ui.att_r.setText(str(format(self.rad_to_deg(self.roll_rate), '.2f'))) # 角速度
+        self.ui.att_p.setText(str(format(self.rad_to_deg(self.pitch_rate), '.2f')))
+        self.ui.att_y.setText(str(format(self.rad_to_deg(self.yaw_rate), '.2f')))
+        self.ui.alt.setText(str(format(self.altitude, '.2f'))) # 高度
+        # self.ui.vel_x.setText(str(self.mavrosSub.velocity.twist.linear.x))
+        # self.ui.vel_y.setText(str(self.mavrosSub.velocity.twist.linear.y))
+        # self.ui.vel_z.setText(str(self.mavrosSub.velocity.twist.linear.z))
+        # self.ui.gps_rawLabel.setText("GPSRAW: " + str(self.mavrosSub.gps_raw.fix_type))
+        # self.ui.nav_sat_fixLabel.setText("NavSatFix: " + str(self.mavrosSub.nav_sat_fix.status.status))
+        # self.ui.targetLabel.setText("Target: " + str(self.mavrosSub.target))
 
     # [左键点击]
     def monitor_mousePressEvent(self, event):
@@ -274,9 +362,13 @@ class MainWindow(QMainWindow, Node):
 
             # 画面添加额外信息
             # 帧率
-            cv2.putText(frame, "FPS: " + ("99+" if self.fps > 99 else str(int(self.fps))), (5, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (50, 170, 50), 1)
+            # cv2.putText(frame, "FPS: " + ("99+" if self.fps > 99 else str(int(self.fps))), (5, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (50, 170, 50), 1)
+            self.ui.fpsLCD.display((99 if self.fps > 99 else int(self.fps)))
             # 目标中心坐标 
-            cv2.putText(frame, "Target: (" + str(self.target.cx) + "%, " + str(self.target.cy) + '%)', (5, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (50, 170, 50), 1)
+            # cv2.putText(frame, "Target: (" + str(self.target.cx) + "%, " + str(self.target.cy) + '%)', (5, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (50, 170, 50), 1)
+            self.ui.detect_val.setText(str(self.target.detect_flag))
+            self.ui.cx_val.setText(str(self.target.cx) + ' %')
+            self.ui.cy_val.setText(str(self.target.cy) + ' %')
             cross_length = 20
             # 十字线
             cv2.line(frame, (int(self.cap_width / 2) - cross_length, int(self.cap_height / 2)), (int(self.cap_width / 2) + cross_length, int(self.cap_height / 2)), (0, 255, 0), 1)
@@ -286,6 +378,7 @@ class MainWindow(QMainWindow, Node):
             im = QImage(frame.data, frame.shape[1], frame.shape[0], frame.shape[2] * frame.shape[1],
                         QImage.Format_BGR888)
             self.ui.imageLabel.setPixmap(QPixmap.fromImage(im))
+            self.ui.imageLabel.adjustSize()
         # 否则报错
         else:
             print("摄像头读取错误, 退出程序")
@@ -295,6 +388,7 @@ class MainWindow(QMainWindow, Node):
 def main(args=None):
     rclpy.init(args=args)
     app = QApplication(sys.argv)
+    app.styleHints().setColorScheme(Qt.ColorScheme.Light)
     widget = MainWindow()
     widget.show()
 

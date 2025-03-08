@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>668</width>
-    <height>535</height>
+    <width>1058</width>
+    <height>547</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="QPushButton" name="trackButton">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>400</y>
+      <x>870</x>
+      <y>320</y>
       <width>161</width>
       <height>71</height>
      </rect>
@@ -26,6 +26,7 @@
     <property name="font">
      <font>
       <pointsize>20</pointsize>
+      <bold>true</bold>
      </font>
     </property>
     <property name="text">
@@ -35,8 +36,8 @@
    <widget class="QLabel" name="imageLabel">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
+      <x>220</x>
+      <y>110</y>
       <width>640</width>
       <height>360</height>
      </rect>
@@ -45,6 +46,12 @@
      <font>
       <pointsize>24</pointsize>
      </font>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::WinPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Sunken</enum>
     </property>
     <property name="text">
      <string>实时画面</string>
@@ -59,7 +66,7 @@
    <widget class="QPushButton" name="clickButton">
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>870</x>
       <y>400</y>
       <width>161</width>
       <height>71</height>
@@ -68,11 +75,450 @@
     <property name="font">
      <font>
       <pointsize>20</pointsize>
+      <bold>true</bold>
      </font>
     </property>
     <property name="text">
      <string>漫游</string>
     </property>
+   </widget>
+   <widget class="QLabel" name="infosLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>100</y>
+      <width>191</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>飞行信息面板</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>140</y>
+      <width>190</width>
+      <height>319</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="flyinfos">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetDefaultConstraint</enum>
+     </property>
+     <item>
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="info_vel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>13</pointsize>
+        </font>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="text">
+        <string>速度 [x y z]  [m/s]</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="vel_info">
+       <item>
+        <widget class="QLabel" name="vel_x">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>0.0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="vel_y">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>0.0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="vel_z">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>0.0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="info_att">
+       <property name="font">
+        <font>
+         <pointsize>13</pointsize>
+        </font>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="text">
+        <string>姿态速率 [r p y]  [deg/s]</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="att_info">
+       <item>
+        <widget class="QLabel" name="att_r">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>0.0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="att_p">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>0.0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="att_y">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>0.0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="info_alt">
+       <property name="font">
+        <font>
+         <pointsize>13</pointsize>
+        </font>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="text">
+        <string>离地高度 [h]  [m]</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="alt_info">
+       <item>
+        <widget class="QLabel" name="alt">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>0.0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="Line" name="line_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QLabel" name="logoLabel">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>10</y>
+      <width>331</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>dsrom10</family>
+      <pointsize>51</pointsize>
+      <italic>false</italic>
+     </font>
+    </property>
+    <property name="text">
+     <string>AirTrack</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="fpsLCD">
+    <property name="geometry">
+     <rect>
+      <x>960</x>
+      <y>110</y>
+      <width>51</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="digitCount">
+     <number>2</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="fpslabel">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>110</y>
+      <width>81</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>24</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>FPS</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>170</y>
+      <width>161</width>
+      <height>141</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="targetinfo">
+     <item>
+      <layout class="QHBoxLayout" name="detect_flag">
+       <item>
+        <widget class="QLabel" name="detectLabel">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>锁定状态 :</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="detect_val">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="cx">
+       <item>
+        <widget class="QLabel" name="cxLabel">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>坐标 X :</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="cx_val">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>0 %</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="cy">
+       <item>
+        <widget class="QLabel" name="cyLabel">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>坐标 Y :</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="cy_val">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>0 %</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -80,7 +526,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>668</width>
+     <width>1058</width>
      <height>24</height>
     </rect>
    </property>
@@ -88,20 +534,32 @@
     <property name="title">
      <string>关于</string>
     </property>
-    <addaction name="author"/>
-    <addaction name="version"/>
+    <widget class="QMenu" name="menu_2">
+     <property name="title">
+      <string>版本</string>
+     </property>
+     <addaction name="actionv1_0"/>
+    </widget>
+    <widget class="QMenu" name="menu_3">
+     <property name="title">
+      <string>作者</string>
+     </property>
+     <addaction name="actionhttps_github_com_Tang_JingWei"/>
+    </widget>
+    <addaction name="menu_3"/>
+    <addaction name="menu_2"/>
    </widget>
    <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="author">
+  <action name="actionv1_0">
    <property name="text">
-    <string>作者</string>
+    <string>v1.0</string>
    </property>
   </action>
-  <action name="version">
+  <action name="actionhttps_github_com_Tang_JingWei">
    <property name="text">
-    <string>版本</string>
+    <string>https://github.com/Tang-JingWei</string>
    </property>
   </action>
  </widget>
