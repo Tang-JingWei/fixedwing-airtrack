@@ -65,6 +65,7 @@ class FixedWingTargetTracker(Node):
         self.mission_state = "INIT"
         self.service_pending = None
         self.target_thrust = 0.7  # 固定推力值 (0.0-1.0)
+        self.target_altitude = 0  # 固定飞行高度 (m)
         self.target_roll_rate = 0.0  # 目标滚转速率 (rad/s)
         self.target_pitch_rate = 0.0  # 目标俯仰速率 (rad/s)
         self.target_roll = 0.0  # 目标滚转角 (rad)
@@ -171,14 +172,29 @@ class FixedWingTargetTracker(Node):
             roll = -roll_angle
 
         # pitch角度控制
+        pitch = pitch_angle
         if (abs(cy - k) <= Y_OVERLOOK_K):
-            pitch = 0.0
+            pass
         elif (cy - k > Y_OVERLOOK_K):
-            pitch = pitch_angle
+            pitch += 0.2 * min(1.0, (cy - k - Y_OVERLOOK_K) / (50 - Y_OVERLOOK_K))
         elif (cy - k < -Y_OVERLOOK_K):
-            pitch = -pitch_angle
+            pitch += -0.2 * min(1.0, (k - cy - Y_OVERLOOK_K) / (50 - Y_OVERLOOK_K))
 
         return roll, pitch
+    
+    def altitude_pid_control(self, target_altitude, kp=0.2, ki=0.0, kd=0.0):
+        """使用 PID 控制油门，使飞机保持目标高度"""
+        if not self.altitude_received or not target_altitude:
+            return self.target_thrust  # 如果没有高度数据，使用默认推力
+        # 计算误差
+        altitude_error = target_altitude - self.current_altitude
+        # 计算 PID 控制量
+        p_term = kp * altitude_error
+        # 计算最终推力
+        thrust = 0.5 + p_term
+        # 限制推力范围 (防止过大或过小)
+        thrust = max(0.3, min(0.8, thrust))
+        return thrust
 
     def timer_callback(self):
         # self.get_logger().info(f"Timer triggered at {time.time():.3f}")
@@ -217,17 +233,19 @@ class FixedWingTargetTracker(Node):
                 #     self.get_logger().warn("Waiting for target position data")
                 #     return
                 self.get_logger().info("Offboard activated, starting target tracking")
+                self.target_altitude = self.current_altitude
                 self.mission_state = "TRACKING"
 
         elif self.mission_state == "TRACKING":
+            pid_thrust = self.altitude_pid_control(self.target_altitude, 0.02, 0, 0)  # PID 计算适当的推力
             # 目标追踪控制
             if self.target_detect_flag:
                 # X 偏差控制 roll，Y 偏差控制 pitch
-                self.target_roll, self.target_pitch = self.pid_Cal(cx = self.target_x, cy = self.target_y, roll_angle=0.3, pitch_angle=0.3)
+                self.target_roll, self.target_pitch = self.pid_Cal(cx = self.target_x, cy = self.target_y, roll_angle=0.3, pitch_angle=0.1)
                 self.publish_target_attitude(roll=self.target_roll, pitch=self.target_pitch, yaw=0.0, thrust=self.target_thrust)
             else:
                 # 无目标时，回归直线姿态
-                self.publish_target_attitude(roll=0.0, pitch=0.0, yaw=0.0, thrust=self.target_thrust)
+                self.publish_target_attitude(roll=0.0, pitch=0.0, yaw=0.0, thrust=pid_thrust)
 
     def shutdown_hook(self):
         if self.previous_mode and self.current_state and self.current_state.mode == "OFFBOARD":
